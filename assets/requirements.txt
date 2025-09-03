@@ -1,0 +1,8 @@
+arrow
+aiohttp
+loguru
+pytest
+pytest-cov
+ruff
+mypy
+redis

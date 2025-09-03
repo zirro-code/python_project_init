@@ -1,0 +1,46 @@
+services:
+  mongo:
+    container_name: mongo_appname
+
+    image: "mongo:7.0"
+    restart: on-failure
+    ports:
+      - "27017:27017"
+
+    volumes:
+      - "mongo:/data/db"
+
+    mem_limit: 512m
+    cpus: 0.5
+
+    networks:
+      - network
+
+  app:
+    container_name: appname
+
+    build: app.dockerfile
+    # image:
+    restart: unless-stopped
+    pull_policy: always
+    env_file: .env
+    network_mode: "host"
+
+    volumes:
+      - "./logs:logs"
+      - "./backup:backup"
+
+    mem_limit: 512m
+    cpus: 0.5
+
+    depends_on:
+      - mongo
+    networks:
+      - network
+
+volumes:
+  app:
+  mongo:
+
+networks:
+  network:
