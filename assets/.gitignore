@@ -2,6 +2,9 @@ logs
 input
 output
 
+foo.py
+bar.py
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,8 +1,9 @@
 arrow
 aiohttp
 loguru
+
 pytest
 pytest-cov
+pytest-asyncio
 ruff
 mypy
-redis

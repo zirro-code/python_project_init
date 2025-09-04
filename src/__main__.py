@@ -14,6 +14,7 @@ if __name__ == "__main__":
 
 # TODO: ci (tox)
 # TODO: cd
+# TODO: filemanager
 # TODO: terraform
 # TODO: fastapi
 # TODO: write tests for current functionality
