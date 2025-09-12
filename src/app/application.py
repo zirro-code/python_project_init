@@ -37,12 +37,14 @@ class Application:
             "restart.sh",
             "ci.sh",
             "mypy.ini",
+            "pytest.ini",
             "ruff.toml",
             ".vscode",
             "tests",
             "src/__main__.py",
             "src/__init__.py",
             "src/core/log.py",
+            "src/core/file_manager.py",
             "src/core/http_clients/http_client.py",
             "src/app/application.py",
             "src/app/config.py",
@@ -70,6 +72,32 @@ class Application:
 
             Application.__add_var_to_env("MONGO_URI", "mongodb://localhost:27017/")
             Application.__add_var_to_env("MONGO_DATABASE_NAME", "")
+
+    @staticmethod
+    def _handle_postgres() -> None:
+        for filename in [
+            "src/core/postgres",
+            "alembic.ini",
+        ]:
+            Application.__copy_fileobj(
+                pathlib.Path(str(Application.ASSETS_FOLDER_PATH) + "/" + filename)
+            )
+
+            Application.__add_module_to_requirements("sqlalchemy[asyncio]")
+            Application.__add_module_to_requirements("asyncpg")
+            Application.__add_module_to_requirements("alembic")
+
+            Application.__add_var_to_env(
+                "POSTGRES_URI",
+                "postgresql+asyncpg://pguser:pgpass@localhost:5432/",
+            )
+            Application.__add_var_to_env("POSTGRES_DATABASE_NAME", "")
+
+            Application.__add_var_to_env(
+                "ALEMBIC_POSTGRES_URI",
+                "POSTGRES_URI=postgresql+psycopg://postgres:superadmin@localhost:5432/",
+            )
+            Application.__add_var_to_env("ALEMBIC_POSTGRES_DATABASE_NAME", "")
 
     @staticmethod
     def _handle_docker() -> None:
