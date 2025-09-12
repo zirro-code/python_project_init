@@ -25,6 +25,27 @@ def async_atomic(
     return decorator
 
 
+def flatten_json(
+    obj: dict[str, Any] | list[Any], parent_key: str = "", sep: str = "."
+) -> dict[str, Any]:
+    """Recursively flattens a nested dict/list into a flat dict."""
+    items: list[Any] = []
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            new_key = f"{parent_key}{sep}{k}" if parent_key else k
+            items.extend(flatten_json(v, new_key, sep=sep).items())
+    elif isinstance(obj, list):  # pyright: ignore [reportUnnecessaryIsInstance]
+        if all(not isinstance(i, dict | list) for i in obj):
+            items.append((parent_key, ",".join(map(str, obj))))
+        else:
+            for idx, v in enumerate(obj):
+                new_key = f"{parent_key}{sep}{idx}"
+                items.extend(flatten_json(v, new_key, sep=sep).items())
+    else:
+        items.append((parent_key, obj))
+    return dict(items)
+
+
 if __name__ == "__main__":
 
     async def main() -> None:
@@ -45,5 +66,8 @@ if __name__ == "__main__":
             return f"str {test}"
 
         await asyncio.gather(*(test_async1(1) for _ in range(10)))
+
+        data: dict[str, Any] = {"a": 1, "b": [{"c": 1, "d": 2}, {"c": 1, "d": 2}]}
+        flatten_json(data)
 
     asyncio.run(main())
