@@ -1,13 +1,15 @@
 import asyncio
+import os
 import sys
-from pathlib import Path
 
 from loguru import logger
+
+from src.core.file_manager import FileManager
 
 
 class Configuration:
     def _set_up_logger(self) -> None:
-        self._set_up_directories(["./logs"])
+        FileManager.set_up_directory("./logs")
 
         logger.remove()
         logger.add(
@@ -19,16 +21,22 @@ class Configuration:
         )
         logger.add(
             sys.stderr,
-            level="INFO",
+            level="DEBUG" if self.get_debug_mode() else "INFO",
         )
 
-    def _set_up_directories(self, paths: list[str]) -> None:
-        for path in paths:
-            if not Path(path).exists():
-                Path(path).mkdir(parents=True)
+    @staticmethod
+    def get_debug_mode() -> bool:
+        env_var: str | None = os.getenv("DEBUG_MODE")
+
+        if env_var is None:
+            return False
+        if env_var.lower() == "true":
+            return True
+        else:
+            return False
 
     def setup(self) -> "Configuration":
-        self._set_up_directories(["./", "./backup/mongo"])
+        FileManager.set_up_directory("./backup/mongo")
         self._set_up_logger()
 
         return self
