@@ -17,6 +17,7 @@ class BaseModel(AsyncAttrs, DeclarativeBase):
     pass
 
 
+# TODO: rewrite sql connector
 class Connector:
     db: async_sessionmaker[AsyncSession]
     engine: AsyncEngine

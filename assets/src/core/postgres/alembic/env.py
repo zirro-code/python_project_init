@@ -10,7 +10,7 @@ config = context.config
 
 config.set_main_option(
     "sqlalchemy.url",
-    f"{os.environ['POSTGRES_URI']}{os.environ['POSTGRES_DATABASE_NAME']}",
+    f"{os.environ['ALEMBIC_POSTGRES_URI']}{os.environ['ALEMBIC_POSTGRES_DATABASE_NAME']}",
 )
 
 if config.config_file_name is not None:
