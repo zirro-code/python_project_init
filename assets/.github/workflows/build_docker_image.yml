@@ -1,9 +1,11 @@
 name: Build docker image
 
 on:
-  push:
-    branches:
-      - main
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
 
   workflow_dispatch:
 
@@ -28,6 +30,27 @@ jobs:
       - name: Log into registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
 
+      - name: Retrieve build meta
+        id: build-meta
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          PR_BRANCH="${{ github.event.pull_request.head.ref }}"
+          COMMIT_SHA="${{ github.sha }}"
+          GITHUB_REF="${{ github.ref }}"
+
+          deploy_regex="\\(deploy-as: ([^)]*)\\)"
+
+          if [[ "$PR_TITLE" =~ $deploy_regex ]]; then
+            result="${BASH_REMATCH[1]}"
+          elif [[ "$PR_TITLE" =~ ([a-zA-Z]+-[0-9]+) ]]; then
+            result="${BASH_REMATCH[1]}-$PR_NUMBER"
+          else
+            result="$PR_BRANCH"
+          fi
+
+          echo "result=$result $GITHUB_REF $COMMIT_SHA" >> "$GITHUB_OUTPUT"
+
       - name: Build and push the image
         run: |
           IMAGE_ID=${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.image }}
@@ -39,5 +62,5 @@ jobs:
           TAG=$(echo $TAG | tr '[A-Z]' '[a-z]')
           echo TAG=$TAG
 
-          docker build . -f ${{ matrix.image }}.dockerfile -t $TAG
+          docker build . -f ${{ matrix.image }}.dockerfile -t $TAG --build-arg APP_VERSION="${{ steps.build-meta.outputs.result }}"
           docker push $TAG
