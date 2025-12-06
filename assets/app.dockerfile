@@ -10,6 +10,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     htop
 RUN addgroup -S -g 10001 app && adduser -S -D -H -u 10001 -G app app
 
+ARG APP_VERSION
+ENV APP_VERSION=${APP_VERSION}
+
 WORKDIR /home/app
 COPY ./requirements.txt ./
 RUN pip install -r requirements.txt
