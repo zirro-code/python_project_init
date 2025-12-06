@@ -8,7 +8,7 @@ import src.core.file_manager
 
 
 @pytest.mark.no_cover
-def remove_dir_recursive(path: pathlib.Path):
+def remove_dir_recursive(path: pathlib.Path) -> None:
     for child in path.iterdir():
         if child.is_file() or child.is_symlink():
             child.unlink()

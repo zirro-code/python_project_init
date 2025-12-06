@@ -1,18 +1,19 @@
 import csv
 import pathlib
-from typing import Any
+from collections.abc import Generator
+from typing import Any, Literal
 
 import src.core.misc
 
 
 class FileManager:
     def __init__(self, base_directory: pathlib.Path | None = None) -> None:
-        base_directory = base_directory or pathlib.Path()
+        self.base_directory = base_directory or pathlib.Path()
 
-        self.cache_dir = base_directory / pathlib.Path("cache")
-        self.input_dir = base_directory / pathlib.Path("input")
-        self.output_dir = base_directory / pathlib.Path("output")
-        self.backup_dir = base_directory / pathlib.Path("backup")
+        self.cache_dir = self.base_directory / pathlib.Path("cache")
+        self.input_dir = self.base_directory / pathlib.Path("input")
+        self.output_dir = self.base_directory / pathlib.Path("output")
+        self.backup_dir = self.base_directory / pathlib.Path("backup")
 
     @staticmethod
     def set_up_directory(path: str | pathlib.Path) -> None:
@@ -21,6 +22,15 @@ class FileManager:
         )
         if not pathlib.Path(path_to_check).exists():
             pathlib.Path(path_to_check).mkdir(parents=True)
+
+    def get_env_variable_names(
+        self, space: Literal[".env", ".env.example"]
+    ) -> Generator[str, Any, None]:
+        env_namespace: str = f"./{space}"
+        path = self.base_directory / pathlib.Path(env_namespace)
+        with path.open("r") as file:
+            for line in file:
+                yield line.split("=")[0].upper()
 
     def dump_csv(self, data: list[dict[str, Any]], output_file_name: str) -> None:
         flattened_data: list[dict[Any, Any]] = [
