@@ -1,6 +1,6 @@
 import asyncio
 import os
-from typing import Any, ClassVar, Self, TypedDict
+from typing import Any, TypedDict
 
 from bson import ObjectId
 from loguru import logger
@@ -15,25 +15,12 @@ class User(TypedDict):
 
 
 class UsersCollection(AbstractCollection):
-    _instance: ClassVar[Self | None] = None
-    __initialized: bool
-
-    def __new__(cls) -> Self:
-        if cls._instance is None:
-            cls._instance = super(UsersCollection, cls).__new__(cls)
-            cls.__initialized = False
-        return cls._instance
-
-    def __init__(self) -> None:
-        if self.__initialized:
-            return
-        self.__initialized = True
-
+    def _init_singleton(self) -> None:
         self.db: AsyncDatabase[Any] = Connector(
             database_name=os.environ["MONGO_DATABASE_NAME"]
         ).db
-        self.collection_name = "users"
 
+        self.collection_name = "users"
         self.collection: AsyncCollection[User] = self.db[self.collection_name]
 
 
@@ -43,8 +30,11 @@ if __name__ == "__main__":
         os.environ["MONGO_DATABASE_NAME"] = "_test"
         os.environ["MONGO_URI"] = "mongodb://localhost:27017/"
 
-        mongo_users = UsersCollection()
-        logger.info(f"Result: {await mongo_users.collection.find_one({})}")
-        await mongo_users.backup()
+        mongo_collection1 = UsersCollection()
+        mongo_collection2 = UsersCollection()
+        assert mongo_collection1 is mongo_collection2
+
+        logger.info(f"Result: {await mongo_collection1.collection.find_one({})}")
+        await mongo_collection1.backup()
 
     asyncio.run(main())

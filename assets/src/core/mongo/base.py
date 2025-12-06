@@ -2,7 +2,7 @@ import abc
 import asyncio
 import gzip
 import os
-from typing import Any, Self
+from typing import Any, ClassVar, Self
 
 import arrow
 from bson import json_util
@@ -36,7 +36,35 @@ class Connector:
         return self
 
 
-class AbstractCollection(abc.ABC):
+class MongoCollectionSingleton(abc.ABC):
+    _instance: ClassVar[Self | None] = None
+    _initialized: ClassVar[bool] = False
+
+    def __new__(cls) -> Self:
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __init__(self) -> None:
+        cls = type(self)
+        if cls._initialized:
+            return
+        super().__init__()
+        cls._initialized = True
+        self._init_singleton()
+
+    @abc.abstractmethod
+    def _init_singleton(self) -> None:
+        """
+        Hook called exactly once per subclass.
+        Override this in subclasses instead of __init__.
+        """
+        raise NotImplementedError(
+            "Initiated singleton subclass does not implement _init_singleton"
+        )
+
+
+class AbstractCollection(MongoCollectionSingleton, abc.ABC):
     db: AsyncDatabase[Any]
     collection_name: str
     collection: AsyncCollection[Any]
@@ -51,6 +79,9 @@ class AbstractCollection(abc.ABC):
             async for document in self.collection.find({}):
                 dumped_info = json_util.dumps(document)
                 gz.write(dumped_info + "\n")
+
+    def _init_singleton(self) -> None:
+        pass
 
 
 if __name__ == "__main__":
