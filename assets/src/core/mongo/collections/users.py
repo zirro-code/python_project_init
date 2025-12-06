@@ -1,6 +1,6 @@
 import asyncio
 import os
-from typing import Any, Optional, TypedDict
+from typing import Any, ClassVar, Self, TypedDict
 
 from bson import ObjectId
 from loguru import logger
@@ -15,10 +15,10 @@ class User(TypedDict):
 
 
 class UsersCollection(AbstractCollection):
-    _instance: Optional["UsersCollection"] = None
+    _instance: ClassVar[Self | None] = None
     __initialized: bool
 
-    def __new__(cls) -> "UsersCollection":
+    def __new__(cls) -> Self:
         if cls._instance is None:
             cls._instance = super(UsersCollection, cls).__new__(cls)
             cls.__initialized = False
@@ -40,7 +40,7 @@ class UsersCollection(AbstractCollection):
 if __name__ == "__main__":
 
     async def main() -> None:
-        os.environ["MONGO_DATABASE_NAME"] = "tradelink_test"
+        os.environ["MONGO_DATABASE_NAME"] = "_test"
         os.environ["MONGO_URI"] = "mongodb://localhost:27017/"
 
         mongo_users = UsersCollection()

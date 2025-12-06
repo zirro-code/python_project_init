@@ -2,7 +2,7 @@ import abc
 import asyncio
 import gzip
 import os
-from typing import Any
+from typing import Any, Self
 
 import arrow
 from bson import json_util
@@ -21,7 +21,7 @@ class Connector:
     def __init__(self, database_name: str):
         self.db = AsyncMongoClient(os.environ["MONGO_URI"])[database_name]
 
-    async def ainit(self) -> "Connector":
+    async def ainit(self) -> Self:
         try:
             with timeout(1):
                 collections = await self.db.list_collection_names()
