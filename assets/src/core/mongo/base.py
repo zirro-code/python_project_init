@@ -64,7 +64,7 @@ class MongoCollectionSingleton(abc.ABC):
         )
 
 
-class AbstractCollection(MongoCollectionSingleton, abc.ABC):
+class AbstractCollection(abc.ABC):
     db: AsyncDatabase[Any]
     collection_name: str
     collection: AsyncCollection[Any]
@@ -79,9 +79,6 @@ class AbstractCollection(MongoCollectionSingleton, abc.ABC):
             async for document in self.collection.find({}):
                 dumped_info = json_util.dumps(document)
                 gz.write(dumped_info + "\n")
-
-    def _init_singleton(self) -> None:
-        pass
 
 
 if __name__ == "__main__":

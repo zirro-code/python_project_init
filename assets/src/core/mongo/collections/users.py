@@ -7,14 +7,14 @@ from loguru import logger
 from pymongo.asynchronous.collection import AsyncCollection
 from pymongo.asynchronous.database import AsyncDatabase
 
-from src.core.mongo.base import AbstractCollection, Connector
+from src.core.mongo.base import AbstractCollection, Connector, MongoCollectionSingleton
 
 
 class User(TypedDict):
     _id: ObjectId
 
 
-class UsersCollection(AbstractCollection):
+class UsersCollection(MongoCollectionSingleton, AbstractCollection):
     def _init_singleton(self) -> None:
         self.db: AsyncDatabase[Any] = Connector(
             database_name=os.environ["MONGO_DATABASE_NAME"]
